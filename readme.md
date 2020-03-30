@@ -6,7 +6,7 @@ A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphic
 
 Sources
 ----------------
-The main data is from https://covidtracking.com/ and I pulled population data (for calculating per capita statistics) off of Wikipedia or something.
+The main data is from https://covidtracking.com/ and I pulled population data (for calculating per-capita statistics) off of Wikipedia or something.
 
 Goals
 ----------------
