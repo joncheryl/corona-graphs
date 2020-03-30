@@ -58,6 +58,7 @@
 	 var pos_abs_data = [];
 	 var test_abs_data = [];
 	 var pos_per_data = [];
+	 var perc_change_data = [];
 	 
 	 state_alpha.forEach(function(st, i){
 	     state_array[st] = {
@@ -103,6 +104,15 @@
 	     };
 
 	     pos_per_data[i] = {
+		 x: [],
+		 y: [],
+		 name: st,
+		 mode: 'lines',
+		 visible: 'legendonly',
+		 hoverinfo: 'name'
+	     };
+
+	     perc_change_data[i] = {
 		 x: [],
 		 y: [],
 		 name: st,
@@ -188,6 +198,15 @@
 	     text: 'US'
 	 };
 
+	 perc_change_data[perc_change_data.length] = {
+	     x: [],
+	     y: [],
+	     name: 'US',
+	     mode: 'lines+text',
+	     hoverinfo: 'name',
+	     text: 'US'
+	 };
+
 	 state_alpha.push('US');
 	 
 	 //
@@ -245,7 +264,7 @@
 	 });
 
 	 //
-	 // data for total number of test administered plot
+	 // data for positive tests per capita
 	 //
 
 	 state_alpha.forEach(function(st, i) {
@@ -256,6 +275,19 @@
 	     }
 	 });
 
+	 //
+	 // data for percent change by day
+	 //
+
+	 state_alpha.forEach(function(st, i) {
+	     perc_change_data[i].x = state_array[st].date;
+
+	     for (var day = 0; day < state_array[st].pos_tests.length - 1; day++) {
+		 if(state_array[st].pos_tests[day+1] > 0){
+		     perc_change_data[i].y[day] = state_array[st].pos_tests[day] / state_array[st].pos_tests[day+1] - 1;
+		 }
+	     }
+	 });
 
 	 /*
 	  *
@@ -461,6 +493,36 @@
 	 
 	 Plotly.newPlot(pos_per, pos_per_data, layout_pos_per, config);
 	 
+	 //
+	 // Percent change from previous day in positive cases plot
+	 //
+	 
+	 perc_change = document.getElementById('perc_change_div');
+
+	 var layout_perc_change = {
+	     title: '<b>Percent Change in Positive Test Results from Previous Day by State</b><br>Choose linear or log y-axis in dropdown menu on left',
+	     xaxis: {
+		 range: ['2020-03-04', new Date]
+	     },
+	     yaxis: {
+		 title: {
+		     text: 'Percent change from previous day',
+		     standoff: 20
+		 },
+		 tickformat: '%',
+		 range: [0, 1],
+		 autorange: true
+	     },
+	     hovermode: 'closest',
+	     dragmode: false,
+	 };
+
+	 var config = {
+	     displaylogo: false
+	 };
+	 
+	 Plotly.newPlot(perc_change, perc_change_data, layout_perc_change, config);
+	 
      });
 
      
@@ -481,9 +543,9 @@
 
 	<div style="width:100%; overflow: hidden;" >
 	    <div id="pos_per_div" style="width:50%; float:left; height:700px;"></div>
-	    <div id="pos_absz_div" style="margin-left:52%; height:700px;"></div>
+	    <div id="perc_change_div" style="margin-left:52%; height:700px;"></div>
 	</div>
-	
+
     </body>
     
 </html>
