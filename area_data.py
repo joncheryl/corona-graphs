@@ -54,4 +54,4 @@ df = df[['STATE', 'COUNTY', 'NAME', 'AREALAND']]
 df = df.rename(columns={'STATE': 'state', 'COUNTY': 'county', 'NAME': 'name',
                         'AREALAND': 'area'})
 
-df.to_csv('state_area.csv', index=False)
+df.to_csv('area_data.csv', index=False)
