@@ -22,14 +22,48 @@ pop_data = pop_data.rename(columns={'STATE': 'state',
                                     'POPESTIMATE2019': 'population'})
 pop_data['fips'] = pop_data.state + pop_data.county
 
-# Join area and population tables and get density
+# join area and population tables
 all_data = area_data.merge(pop_data)
 
-# convert square meters to square miles
+# convert square meters to square miles and get density
 all_data.area /= 2589988
-
-# compute population density for each county
 all_data['density'] = all_data.population / all_data.area
+
+# drop columns we no longer need
+all_data = all_data.drop(columns=['area', 'county', 'population'])
+
+# manually add New York City, Kansas City, and non-states
+kc_data = pd.DataFrame({'state': ['29'],
+                        'name': ['Kansas City'],
+                        'fips': ['29999'],
+                        'density': [1400]})
+nyc_data = pd.DataFrame({'state': ['36'],
+                         'name': ['New York City'],
+                         'fips': ['36999'],
+                         'density': [28188]})
+as_data = pd.DataFrame({'state': ['60'],
+                        'name': ['American Samoa'],
+                        'fips': ['60999'],
+                        'density': [670.8]})
+gu_data = pd.DataFrame({'state': ['66'],
+                        'name': ['Guam'],
+                        'fips': ['66999'],
+                        'density': [774.4]})
+mp_data = pd.DataFrame({'state': ['69'],
+                        'name': ['Northern Mariana Islands'],
+                        'fips': ['69999'],
+                        'density': [292.7]})
+pr_data = pd.DataFrame({'state': ['72'],
+                        'name': ['Puerto Rico'],
+                        'fips': ['72999'],
+                        'density': [909.1]})
+vi_data = pd.DataFrame({'state': ['78'],
+                        'name': ['Virgin Islands'],
+                        'fips': ['78999'],
+                        'density': [769.2]})
+
+all_data = pd.concat([all_data, kc_data, nyc_data, as_data, gu_data, mp_data,
+                      pr_data, vi_data], ignore_index=True)
 
 ###
 # Data for dates by states
@@ -75,7 +109,6 @@ shutdown = [('01', ''),
             ('40', ''),
             ('41', '2020-03-23'),
             ('42', ''),
-            ('43', ''),
             ('44', '2020-03-28'),
             ('45', ''),
             ('46', ''),
@@ -87,7 +120,11 @@ shutdown = [('01', ''),
             ('53', '2020-03-23'),
             ('54', '2020-03-25'),
             ('55', ''),
-            ('56', '')]
+            ('56', ''),
+            ('69', ''),
+            ('66', ''),
+            ('72', ''),
+            ('78', '')]
 
 sd = pd.DataFrame(shutdown, columns=['state', 'date_shutdown'], dtype='string')
 
@@ -106,27 +143,8 @@ for s in states:
 
 all_data = all_data.merge(sd)
 
-
-# drop columns we no longer need
-all_data = all_data.drop(columns=['area', 'county', 'population'])
-
-#
-# manually enter data for NYC and Kansas City
-#
-nyc_data = pd.DataFrame({'state': ['36'],
-                         'name': ['New York City'],
-                         'fips': ['36999'],
-                         'density': [28188],
-                         'date_shutdown': sd[sd.state == '36'].date_shutdown,
-                         'date_surpass': sd[sd.state == '36'].date_surpass})
-
-kc_data = pd.DataFrame({'state': ['29'],
-                        'name': ['Kansas City'],
-                        'fips': ['29999'],
-                        'density': [1400],
-                        'date_shutdown': sd[sd.state == '29'].date_shutdown,
-                        'date_surpass': sd[sd.state == '29'].date_surpass})
-
-all_data = pd.concat([all_data, nyc_data, kc_data], ignore_index=True)
+###
+# Finish him
+###
 
 all_data.to_csv('county_data.csv', index=False)
