@@ -4,7 +4,6 @@
 
 import pandas as pd
 import numpy as np
-# import datetime as dt
 from sklearn.linear_model import LinearRegression
 
 ###
@@ -15,6 +14,9 @@ from sklearn.linear_model import LinearRegression
 c_days = pd.read_csv("us-counties-covid.csv", dtype={'fips': 'string'},
                      parse_dates=['date'])
 
+###
+# Deal with 7 exceptions (NYC, KC, AS, GU, MP, PR, VI)
+###
 
 # remove days that have <= N cases
 N = 10
@@ -24,21 +26,15 @@ c_days = c_days[c_days.cases > N]
 c_days['log_cases'] = np.log(c_days.cases)
 
 ###
-# Deal with 7 exceptions (NYC, KC, AS, GU, MP, PR, VI)
-###
-
-###
 # Run a regression for each county
 ###
 
 counties = c_days.fips.unique()
-counties = pd.DataFrame({'fips': counties})
-counties['slope'] = np.nan
 
-i = 0
+slope_data = []
 
-for i in counties.index:
-    temp = c_days.fips == counties.fips[i]
+for c in counties:
+    temp = c_days.fips == c
 
     # check if there's at least two data points to regress
     if temp.sum() > 1:
@@ -51,6 +47,8 @@ for i in counties.index:
 
         model = LinearRegression().fit(x_ar, Y)
 
-        counties.loc[i, 'slope'] = model.coef_
+        slope_data.append([c, model.coef_])
 
-counties.to_csv('county_slopes.csv', index=False)
+slopes = pd.DataFrame(slope_data, columns=['fips', 'slope'])
+
+slopes.to_csv('county_slopes.csv', index=False)
