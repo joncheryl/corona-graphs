@@ -47,7 +47,7 @@ for c in counties:
 
         model = LinearRegression().fit(x_ar, Y)
 
-        slope_data.append([c, model.coef_])
+        slope_data.append([c, model.coef_[0]])
 
 slopes = pd.DataFrame(slope_data, columns=['fips', 'slope'])
 
