@@ -68,7 +68,9 @@ county_slopes = pd.DataFrame(slope_data, columns=['fips',
                                                   'days_over'])
 
 ###
+#
 # Import all the stuff and make one final dataframe
+#
 ###
 county_data = pd.read_csv('county_data.csv', dtype={'fips': 'string'},
                           parse_dates=['date_shutdown', 'date_surpass'])
@@ -85,6 +87,12 @@ time_diff = shut_int - sur_int
 county_data['days_shutdown'] = time_diff
 
 county_data['log_density'] = np.log(county_data.density)
+
+###
+#
+# Analysis
+#
+###
 
 # we could use
 # 1. subtract min (or almost min)
