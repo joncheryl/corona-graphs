@@ -10,13 +10,68 @@ from datetime import datetime
 import statsmodels.api as sm
 
 ###
+# Regression lines fit for each county for crowth curves of cv infections
+#
+# data from raw.githubusercontent.com/nytimes/covid-19-data/
+# master/us-counties.csv
+###
+
+c_days = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/'
+                     'master/us-counties.csv',
+                     dtype={'fips': 'string'},
+                     parse_dates=['date'])
+
+###
+# Deal with 7 exceptions (NYC, KC, AS, GU, MP, PR, VI)
+###
+c_days.loc[c_days.county == 'Kansas City', 'fips'] = '29999'
+c_days.loc[c_days.county == 'New York City', 'fips'] = '36999'
+c_days.loc[c_days.county == 'American Samoa', 'fips'] = '60999'
+c_days.loc[c_days.county == 'Guam', 'fips'] = '66999'
+c_days.loc[c_days.county == 'Northern Mariana Islands', 'fips'] = '69999'
+c_days.loc[c_days.county == 'Puerto Rico', 'fips'] = '72999'
+c_days.loc[c_days.county == 'Virgin Islands', 'fips'] = '78999'
+
+# remove days that have <= N cases
+N = 10
+c_days = c_days[c_days.cases > N]
+
+# Find log_cases
+c_days['log_cases'] = np.log(c_days.cases)
+
+###
+# Run a regression for each county
+###
+
+counties = c_days.fips.unique()
+
+slope_data = []
+
+for c in counties:
+    temp = c_days.fips == c
+    tempsum = temp.sum()
+
+    # check if there's at least two data points to regress
+    if tempsum > 1:
+        X = c_days.date[temp]
+        Y = c_days.log_cases[temp]
+
+        # get dates in a usable format
+        X = X.apply(lambda x: x.toordinal())
+        X1 = sm.add_constant(X)
+        model = sm.OLS(Y, X1).fit()
+
+        slope_data.append([c, model.params[1], tempsum])
+
+county_slopes = pd.DataFrame(slope_data, columns=['fips',
+                                                  'slope',
+                                                  'days_over'])
+
+###
 # Import all the stuff and make one final dataframe
 ###
 county_data = pd.read_csv('county_data.csv', dtype={'fips': 'string'},
                           parse_dates=['date_shutdown', 'date_surpass'])
-
-county_slopes = pd.read_csv('county_slopes.csv', dtype={'fips': 'string'},
-                            skip_blank_lines=True)
 
 county_data = county_data.merge(county_slopes)
 
@@ -27,7 +82,7 @@ for i in county_data.index:
 shut_int = county_data.date_shutdown.apply(lambda x: x.toordinal())
 sur_int = county_data.date_surpass.apply(lambda x: x.toordinal())
 time_diff = shut_int - sur_int
-county_data['days'] = time_diff
+county_data['days_shutdown'] = time_diff
 
 county_data['log_density'] = np.log(county_data.density)
 
@@ -36,29 +91,26 @@ county_data['log_density'] = np.log(county_data.density)
 # 2. divide by max
 # 3: lambda x: sqrt(2x - x^2)
 
-opac = county_data.county_days_surpassed.copy()
+opac = county_data.days_over.copy()
 opac = opac - opac.min() + .05
 opac /= max(opac)
-opac = opac ** (1/3)  # R-sq = 0.135
+opac = opac ** (1/3)
 # opac = math.sqrt(2*opac - opac**2)
 
-# opac = 1
+# Histogram of log_density
+fig1 = px.histogram(county_data, x='log_density')
+fig1.show()
 
-fig = px.histogram(county_data, x='density')
-# fig.show()
-
+# Histogram of slopes
 fig2 = px.histogram(county_data, x='slope')
-# fig2.show()
+fig2.show()
 
-fig22 = px.box(county_data, x='state', y='slope')
-# fig22.show()
-
+# Scatter of slope by log_density with opacity by days_over
 fig3 = go.Figure(data=go.Scatter(x=county_data.log_density,
                                  y=county_data.slope,
                                  mode='markers',
                                  marker=dict(opacity=opac),
-                                 text=county_data.county_days_surpassed))
-
+                                 text=county_data.days_over))
 fig3.add_trace(
     go.Scatter(
         x=[1, 11],
@@ -70,31 +122,27 @@ fig3.add_trace(
 fig3.show()
 
 
-fig4 = go.Figure(data=go.Scatter(x=county_data.days,
+# Scatter of slope by days_shutdown opacity by days_over
+fig4 = go.Figure(data=go.Scatter(x=county_data.days_shutdown,
                                  y=county_data.slope,
                                  mode='markers',
                                  marker=dict(opacity=opac),
-                                 text=county_data.county_days_surpassed))
+                                 text=county_data.days_over))
 fig4.show()
 
-# fig4 = px.scatter(county_data, x='days', y='slope', opac=)
-# fig4.show()
-
+# Scatter of slope for each state (fips encoded) with colors by log_density
 colors_duke = county_data.log_density
-
 fig5 = go.Figure(data=go.Scatter(x=county_data.state,
                                  y=county_data.slope,
                                  mode='markers',
                                  marker=dict(opacity=opac,
                                              color=colors_duke),
-                                 text=county_data.county_days_surpassed))
-
-# fig5 = px.scatter(county_data, x='state', y='slope', color='log_density')
+                                 text=county_data.days_over))
 fig5.show()
 
-###
-# Histogram of slopes
-###
+# box plots of slope by state
+fig55 = px.box(county_data, x='state', y='slope')
+fig55.show()
 
 ###
 # Model 1: slope ~ density
@@ -117,7 +165,7 @@ print(est_wls.summary())
 ###
 # Model 2: slope ~ density + shutdown_days
 ###
-X1 = county_data[['log_density', 'days']]
+X1 = county_data[['log_density', 'days_shutdown']]
 Y = county_data.slope
 X = sm.add_constant(X1)
 est2_pre = sm.OLS(Y, X)

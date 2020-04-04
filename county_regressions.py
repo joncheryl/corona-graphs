@@ -1,5 +1,8 @@
 ###
 # Regression lines fit for each county for crowth curves of cv infections
+#
+# data from raw.githubusercontent.com/nytimes/covid-19-data/
+# master/us-counties.csv
 ###
 
 import pandas as pd
@@ -10,9 +13,9 @@ from sklearn.linear_model import LinearRegression
 # Import data from nytimes github
 ###
 
-# corona_county_data = pd.read_csv('https://raw.githubusercontent.com/nytimes/
-# covid-19-data/master/us-counties.csv')
-c_days = pd.read_csv("us-counties-covid.csv", dtype={'fips': 'string'},
+c_days = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/'
+                     'master/us-counties.csv',
+                     dtype={'fips': 'string'},
                      parse_dates=['date'])
 
 ###
