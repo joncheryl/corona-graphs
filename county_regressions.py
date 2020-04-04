@@ -10,7 +10,8 @@ from sklearn.linear_model import LinearRegression
 # Import data from nytimes github
 ###
 
-# just locally for now
+# corona_county_data = pd.read_csv('https://raw.githubusercontent.com/nytimes/
+# covid-19-data/master/us-counties.csv')
 c_days = pd.read_csv("us-counties-covid.csv", dtype={'fips': 'string'},
                      parse_dates=['date'])
 
@@ -43,7 +44,7 @@ slope_data = []
 for c in counties:
     temp = c_days.fips == c
     tempsum = temp.sum()
-    
+
     # check if there's at least two data points to regress
     if tempsum > 1:
         X = c_days.date[temp]
@@ -57,6 +58,8 @@ for c in counties:
 
         slope_data.append([c, model.coef_[0], tempsum])
 
-slopes = pd.DataFrame(slope_data, columns=['fips', 'slope', 'county_days_surpassed'])
+slopes = pd.DataFrame(slope_data, columns=['fips',
+                                           'slope',
+                                           'county_days_surpassed'])
 
 slopes.to_csv('county_slopes.csv', index=False)

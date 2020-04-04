@@ -1,25 +1,92 @@
-###
-# Putting all the data together
-###
+#
+# Script to generate static data for analysis
+#
+# -Get the land area of counties data into a usable form.
+# -Way harder than I thought to find the info.
+# -https://tigerweb.geo.census.gov/tigerwebmain/TIGERweb_counties_current.html
+#
+# -Get population data from census.gov and compute density
+#
+# -Manually get shelter-in-place dates (by state) from nytimes April 2, 2020
+#
+# -Get date each state surpassed 10 cases from
+# -https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv
+#
 
+import requests
+import lxml.html as lh
 import pandas as pd
 
-###
-# Data for density
-###
+states = ['al', 'ak', 'az', 'ar', 'as', 'ca', 'co', 'ct', 'de', 'dc', 'fl',
+          'ga', 'gu', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me',
+          'md', 'ma', 'mi', 'mn', 'mp', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh',
+          'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'pr', 'ri',
+          'sc', 'sd', 'tn', 'tx', 'us', 'ut', 'vi', 'vt', 'va', 'wa', 'wv',
+          'wi', 'wy']
 
-# land area by county
-area_data = pd.read_csv("county_area.csv", dtype={'state': 'string',
-                                                  'county': 'string'})
+# get headers
+page = requests.get('https://tigerweb.geo.census.gov/tigerwebmain/Files/'
+                    'bas20/tigerweb_bas20_county_al.html')
+doc = lh.fromstring(page.content)
+tr_elements = doc.xpath('//tr')
+
+col = []
+for t in tr_elements[0]:
+    name = t.text_content()
+    col.append((name, []))
+
+# get data for each state
+for s in states:
+    page = requests.get('https://tigerweb.geo.census.gov/tigerwebmain/Files/'
+                        'bas20/tigerweb_bas20_county_' + s + '.html')
+    doc = lh.fromstring(page.content)
+    tr_elements = doc.xpath('//tr')
+
+    # add data
+    for j in range(1, len(tr_elements)):
+        T = tr_elements[j]
+
+        i = 0    # index of column in T
+        for t in T.iterchildren():
+            data = t.text_content()
+
+            if i == 11:     # make land area a number
+                data = int(data)
+
+            col[i][1].append(data)
+            i += 1
+
+# clean up
+Dict = {title: column for (title, column) in col}
+
+area_data = pd.DataFrame(Dict)
+
+area_data = area_data[['STATE', 'COUNTY', 'NAME', 'AREALAND']]
+
+area_data = area_data.rename(columns={'STATE': 'state',
+                                      'COUNTY': 'county',
+                                      'NAME': 'name',
+                                      'AREALAND': 'area'})
+
+area_data.state.astype('str')
+area_data.county.astype('str')
+
 area_data['fips'] = area_data.state + area_data.county
 
-# population by county
+###
+# add population by county
+# from https://www.census.gov/newsroom/press-kits/2020/
+# pop-estimates-county-metro.html
+###
+
 pop_data = pd.read_csv("co-est2019-alldata.csv", encoding='latin-1',
                        usecols={'STATE', 'COUNTY', 'POPESTIMATE2019'},
                        dtype={'STATE': 'string', 'COUNTY': 'string'})
+
 pop_data = pop_data.rename(columns={'STATE': 'state',
                                     'COUNTY': 'county',
                                     'POPESTIMATE2019': 'population'})
+
 pop_data['fips'] = pop_data.state + pop_data.county
 
 # join area and population tables
@@ -67,6 +134,7 @@ all_data = pd.concat([all_data, kc_data, nyc_data, as_data, gu_data, mp_data,
 
 ###
 # Data for dates by states
+# manually from nytimes
 ###
 
 # shelter-in-place order was put in place by state
@@ -128,7 +196,9 @@ shutdown = [('01', ''),
 
 sd = pd.DataFrame(shutdown, columns=['state', 'date_shutdown'], dtype='string')
 
+###
 # date when cases in each state surpassed N
+##
 state_cases = pd.read_csv('https://raw.githubusercontent.com/nytimes/'
                           'covid-19-data/master/us-states.csv',
                           dtype={'fips': 'string'})

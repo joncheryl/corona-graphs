@@ -67,11 +67,18 @@ fig3.add_trace(
         line=go.scatter.Line(color="blue"),
         showlegend=False)
 )
-
 fig3.show()
 
-fig4 = px.scatter(county_data, x='days', y='slope')
+
+fig4 = go.Figure(data=go.Scatter(x=county_data.days,
+                                 y=county_data.slope,
+                                 mode='markers',
+                                 marker=dict(opacity=opac),
+                                 text=county_data.county_days_surpassed))
 fig4.show()
+
+# fig4 = px.scatter(county_data, x='days', y='slope', opac=)
+# fig4.show()
 
 colors_duke = county_data.log_density
 
