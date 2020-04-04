@@ -2,7 +2,10 @@
 # Way harder than I thought to find the info.
 # This is gonna be a seperate script because it takes a minute to keep making
 # requests from census.gov
-
+#
+# Remember to cite https://tigerweb.geo.census.gov/tigerwebmain/
+# TIGERweb_counties_current.html
+#
 import requests
 import lxml.html as lh
 import pandas as pd
