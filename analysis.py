@@ -102,9 +102,9 @@ county_data['log_density'] = np.log(county_data.density)
 opac = county_data.days_over.copy()
 opac = opac - opac.min() + .05
 opac /= max(opac)
-opac = opac ** (1/3)
-# opac = math.sqrt(2*opac - opac**2)
-
+# opac = opac ** (1/3)
+opac = 2*opac - opac**2
+opac = opac.pow(.5)
 # Histogram of log_density
 fig1 = px.histogram(county_data, x='log_density')
 fig1.show()
@@ -194,7 +194,7 @@ print(est2_wls.summary())
 X1 = county_data[['log_density', 'state']]
 Y = county_data.slope
 X = sm.add_constant(pd.get_dummies(X1, columns=['state']))
-est3_pre = sm.WLS(Y, X)
+est3_pre = sm.OLS(Y, X)
 est3 = est3_pre.fit()
 print(est3.summary())
 
@@ -232,3 +232,58 @@ model = sm.MixedLM.from_formula('slope ~ log_density',
                                 groups=county_data.state)
 result = model.fit()
 print(result.summary())
+
+RE_est = pd.DataFrame.from_dict(result.random_effects, orient='index')
+RE_est = RE_est + result.params.Intercept
+
+pre = {'state': county_data.state, 'fit': result.fittedvalues}
+group_est = pd.DataFrame(data=pre)
+group_est = group_est.groupby('state').mean()
+
+colors_duke = county_data.log_density
+figME = go.Figure(data=go.Scatter(x=county_data.state,
+                                  y=county_data.slope,
+                                  mode='markers',
+                                  marker=dict(opacity=opac,
+                                              color=colors_duke),
+                                  text=county_data.days_over))
+
+figME.add_trace(go.Scatter(x=group_est.index,
+                           y=group_est.fit,
+                           mode='markers',
+                           marker=dict(size=20, color='green', symbol='x')))
+
+figME.show()
+
+
+reg_est = est3_wls.params[list(range(2,53))] + est3_wls.params[0]
+
+reg_pre = {'state': county_data.state, 'fit': est3_wls.fittedvalues}
+reg_group_est = pd.DataFrame(data=reg_pre)
+reg_group_est = reg_group_est.groupby('state').mean()
+
+colors_duke = county_data.log_density
+figME = go.Figure(data=go.Scatter(x=county_data.state,
+                                  y=county_data.slope,
+                                  mode='markers',
+                                  marker=dict(opacity=opac,
+                                              color=colors_duke),
+                                  text=county_data.days_over))
+
+figME.add_trace(go.Scatter(x=reg_group_est.index,
+                           y=reg_group_est.fit,
+                           mode='markers',
+                           marker=dict(size=20, color='green', symbol='x')))
+
+figME.show()
+
+nbinfin = 30
+fighist1 = px.histogram(pd.DataFrame({'group': reg_est}),
+                        x='group',
+                        title='WLS estimates',
+                        nbins=nbinfin).show()
+
+fighist2 = px.histogram(RE_est,
+                        x='Group',
+                        title='RE_REML estimates',
+                        nbins=nbinfin).show()
