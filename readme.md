@@ -1,5 +1,9 @@
 Coronavirus Testing Tracking Graphics
 =================
+New Stuff
+--------------
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb)
+
 Description
 ------------------
 A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state.
