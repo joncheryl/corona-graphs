@@ -1,8 +1,8 @@
 # Coronavirus Analysis and Graphs
 
-This repo contains two related things: some Javascript that creates plots of some coronavirus data and a Jupyter Notebook with analysis of this data.
+This repo contains two related things: 1) a Jupyter Notebook with analysis of some coronavirus data and 2) some Javascript that creates [plots](https://johnsherrill.heliohost.org/corona_graphs.html) of that data.
 
-## Analysis of population density's relationship to infection rates
+## 1) Analysis of population density's relationship to infection rates
 
 Click this badge to see some analysis [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb). If you open the notebook on binder and run it yourself, the analysis is up-to-date with the latest data.
 
@@ -15,12 +15,12 @@ The goal is to become familiar with:
 - the Statsmodels analysis library for Python
 
 And practice:
-- statistical analysis (creating, fitting, and interpreting linear models, weighted regressions, analysing graphics, mixed effect models)
+- statistical analysis (creating, fitting, and interpreting linear models, weighted regressions, mixed effect models, analysing graphics, etc.)
 - using the Jupyter Notebook format for presentation
-- Python in general
-- scrapping data off web
+- Python in general (pandas, numpy, plotly, the Emacs elpy package)
+- scrapping data off web (with lxml Python package)
 
-## Plots of coronavirus data
+## 2) Plots of coronavirus data
 
 A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state. There's a big jupyter notebook in here now too with some statistical analysis.
 
