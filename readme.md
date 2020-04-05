@@ -1,24 +1,40 @@
-Coronavirus Analysis
-=================
-Analysis of population density's relationship to infection rates
---------------
-Click this badge to see some analysis [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb)
+# Coronavirus Analysis and Graphs
 
-Description
-------------------
+This repo contains two related things: some Javascript that creates plots of some coronavirus data and a Jupyter Notebook with analysis of this data.
+
+## Analysis of population density's relationship to infection rates
+
+Click this badge to see some analysis [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb). If you open the notebook on binder and run it yourself, the analysis is up-to-date with the latest data.
+
+### Sources
+The data is from the [NYTimes github](https://github.com/nytimes/covid-19-data) and I scrapped population data from census.gov (specific locales in Python scripts).
+
+### Goals
+
+The goal is to become familiar with:
+- the Statsmodels analysis library for Python
+
+And practice:
+- statistical analysis (creating, fitting, and interpreting linear models, weighted regressions, analysing graphics, mixed effect models)
+- using the Jupyter Notebook format for presentation
+- Python in general
+- scrapping data off web
+
+## Plots of coronavirus data
+
 A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state. There's a big jupyter notebook in here now too with some statistical analysis.
 
-Sources
-----------------
+### Sources
+
 The main data is from https://covidtracking.com/ and I pulled population data (for calculating per-capita statistics) off of Wikipedia or something.
 
-Goals
-----------------
+### Goals
+
 The goal is to become familiar with:
 - the Plotly graphing library for Javascript
 
-And practice interacting with:
-- JSON data
+And practice:
+- interacting with JSON data
 - Javascript
 - A little SQL was used to join two little tables of population data and state two-letter codes.
 
