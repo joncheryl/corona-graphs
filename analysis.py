@@ -102,16 +102,16 @@ county_data['log_density'] = np.log(county_data.density)
 opac = county_data.days_over.copy()
 opac = opac - opac.min() + .05
 opac /= max(opac)
-# opac = opac ** (1/3)
 opac = 2*opac - opac**2
 opac = opac.pow(.5)
+
 # Histogram of log_density
-fig1 = px.histogram(county_data, x='log_density')
-fig1.show()
+#fig1 = px.histogram(county_data, x='log_density')
+#fig1.show()
 
 # Histogram of slopes
-fig2 = px.histogram(county_data, x='slope')
-fig2.show()
+#fig2 = px.histogram(county_data, x='slope')
+#fig2.show()
 
 # Scatter of slope by log_density with opacity by days_over
 fig3 = go.Figure(data=go.Scatter(x=county_data.log_density,
