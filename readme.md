@@ -22,7 +22,7 @@ And practice:
 
 ## 2) Plots of coronavirus data
 
-A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state. There's a big jupyter notebook in here now too with some statistical analysis.
+A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state.
 
 ### Sources
 
