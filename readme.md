@@ -1,12 +1,12 @@
-Coronavirus Testing Tracking Graphics
+Coronavirus Analysis
 =================
-New Stuff
+Analysis of population density's relationship to infection rates
 --------------
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb)
+Click this badge to see some analysis [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joncheryl/corona-graphs/master?filepath=coronavirus-density-analysis.ipynb)
 
 Description
 ------------------
-A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state.
+A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state. There's a big jupyter notebook in here now too with some statistical analysis.
 
 Sources
 ----------------
