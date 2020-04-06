@@ -1,6 +1,6 @@
 # Coronavirus Analysis and Graphs
 
-This repo contains two related things: 1) a Jupyter Notebook with analysis of some coronavirus data and 2) some Javascript that creates [plots](https://johnsherrill.heliohost.org/corona_graphs.html) of that data.
+This repo contains two related things: 1) a Jupyter Notebook with analysis of some coronavirus data and 2) some Javascript that creates [plots](https://gussies.website.org/corona_graphs.html) of that data.
 
 ## 1) Analysis of population density's relationship to infection rates
 
@@ -22,7 +22,7 @@ And practice:
 
 ## 2) Plots of coronavirus data
 
-A [collection](https://johnsherrill.heliohost.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state.
+A [collection](https://gussies.website.org/corona_graphs.html) of graphics for analysing the amount of testing for infection in each state.
 
 ### Sources
 
