@@ -32,503 +32,503 @@
 
      $.getJSON("https://covidtracking.com/api/states/daily", function(data){
 
-	 var x_values = [];
-	 var y_values = [];
-	 var state_values = [];
-	 var date_values = [];
+       var x_values = [];
+       var y_values = [];
+       var state_values = [];
+       var date_values = [];
 
-	 $.each(data, function(index, d){
-	     var n = d.date.toString();
-	     date_values.push(n.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
-	     x_values.push(d.totalTestResults);
-	     y_values.push(d.positive);
-	     state_values.push(d.state);
-	 });
+       $.each(data, function(index, d){
+	 var n = d.date.toString();
+	 date_values.push(n.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
+	 x_values.push(d.totalTestResults);
+	 y_values.push(d.positive);
+	 state_values.push(d.state);
+       });
 
-	 // get set of unique states
-	 function onlyUnique(value, index, self) { 
-	     return self.indexOf(value) === index;
+       // get set of unique states
+       function onlyUnique(value, index, self) { 
+	 return self.indexOf(value) === index;
+       }
+       var state_alpha = state_values.filter( onlyUnique );
+       
+       // prep for data reorganization
+       var state_array = [];
+       var pos_plot_data = [];
+       var test_per_data = [];
+       var pos_abs_data = [];
+       var test_abs_data = [];
+       var pos_per_data = [];
+       var perc_change_data = [];
+       
+       state_alpha.forEach(function(st, i){
+	 state_array[st] = {
+	   pos_tests: [],
+	   total_tests: [],
+	   date: []
+	 };
+	 
+	 pos_plot_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+
+	 test_per_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+
+	 pos_abs_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+
+	 test_abs_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+
+	 pos_per_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+
+	 perc_change_data[i] = {
+	   x: [],
+	   y: [],
+	   name: st,
+	   mode: 'lines',
+	   visible: 'legendonly',
+	   hoverinfo: 'name'
+	 };
+       });
+
+       state_values.forEach(function(state_day, j) {
+	 state_array[state_day].total_tests.push(x_values[j]);
+	 state_array[state_day].pos_tests.push(y_values[j]);
+	 state_array[state_day].date.push(date_values[j]);
+       });
+
+       //
+       // make USA sum of these variables
+       //
+       var how_long = state_array["WA"].total_tests.length;
+       var USA = {US: {pos_tests: [], total_tests: [], date: []}};
+       for(var i=0; i < state_array["WA"].total_tests.length; i++){
+	 USA.US.pos_tests[i] = 0;
+	 USA.US.total_tests[i] = 0;
+	 USA.US.date[i] = state_array["WA"].date[i];
+       }
+       
+       state_alpha.forEach(function(st, i){
+	 for(var j=0; j < state_array["WA"].total_tests.length; j++){
+	   if(state_array[st].pos_tests[j]>0){
+	     USA.US.pos_tests[j] += state_array[st].pos_tests[j];
+	   }
+	   if(state_array[st].total_tests[j]>0){
+	     USA.US.total_tests[j] += state_array[st].total_tests[j];
+	   }
 	 }
-	 var state_alpha = state_values.filter( onlyUnique );
-	 
-	 // prep for data reorganization
-	 var state_array = [];
-	 var pos_plot_data = [];
-	 var test_per_data = [];
-	 var pos_abs_data = [];
-	 var test_abs_data = [];
-	 var pos_per_data = [];
-	 var perc_change_data = [];
-	 
-	 state_alpha.forEach(function(st, i){
-	     state_array[st] = {
-		 pos_tests: [],
-		 total_tests: [],
-		 date: []
-	     };
-	     
-	     pos_plot_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
+       });
 
-	     test_per_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
 
-	     pos_abs_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
+       state_array['US'] = USA['US'];
+       
+       pos_plot_data[pos_plot_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
 
-	     test_abs_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
+       test_per_data[test_per_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
 
-	     pos_per_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
+       pos_abs_data[pos_abs_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
 
-	     perc_change_data[i] = {
-		 x: [],
-		 y: [],
-		 name: st,
-		 mode: 'lines',
-		 visible: 'legendonly',
-		 hoverinfo: 'name'
-	     };
-	 });
+       test_abs_data[test_abs_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
 
-	 state_values.forEach(function(state_day, j) {
-	     state_array[state_day].total_tests.push(x_values[j]);
-	     state_array[state_day].pos_tests.push(y_values[j]);
-	     state_array[state_day].date.push(date_values[j]);
-	 });
+       pos_per_data[pos_per_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
 
-	 //
-	 // make USA sum of these variables
-	 //
-	 var how_long = state_array["WA"].total_tests.length;
-	 var USA = {US: {pos_tests: [], total_tests: [], date: []}};
-	 for(var i=0; i < state_array["WA"].total_tests.length; i++){
-	     USA.US.pos_tests[i] = 0;
-	     USA.US.total_tests[i] = 0;
-	     USA.US.date[i] = state_array["WA"].date[i];
+       perc_change_data[perc_change_data.length] = {
+	 x: [],
+	 y: [],
+	 name: 'US',
+	 mode: 'lines+text',
+	 hoverinfo: 'name',
+	 text: 'US'
+       };
+
+       state_alpha.push('US');
+       
+       //
+       // data for percent positive of all tests plot
+       //
+       
+       state_alpha.forEach(function(st, i) {
+	 pos_plot_data[i].x = state_array[st].date;
+
+	 for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+
+	   var temp = state_array[st].pos_tests[day] / state_array[st].total_tests[day];
+	   if(temp < 1) {
+	     pos_plot_data[i].y[day] = temp;
+	   }
 	 }
-	 
-	 state_alpha.forEach(function(st, i){
-	     for(var j=0; j < state_array["WA"].total_tests.length; j++){
-		 if(state_array[st].pos_tests[j]>0){
-		     USA.US.pos_tests[j] += state_array[st].pos_tests[j];
-		 }
-		 if(state_array[st].total_tests[j]>0){
-		     USA.US.total_tests[j] += state_array[st].total_tests[j];
-		 }
-	     }
-	 });
+       });
 
+       //
+       // data for percent tested per capita plot
+       //
+       // population data
+       var pop = {AL: 4903185, AK: 731545, AZ: 7278717, AR: 3017804, AS: 55641, CA: 39512223, CO: 5758736, CT: 3565287, DE: 973764, DC: 705749, FL: 21477737, GA: 10617423, GU: 164229, HI: 1415872, ID: 1787065, IL: 12671821, IN: 6732219, IA: 3155070, KS: 2913314, KY: 4467673, LA: 4648794, ME: 1344212, MD: 6045680, MA: 6892503, MI: 9986857, MN: 5639632, MP: 55144,  MS: 2976149, MO: 6137428, MT: 1068778, NE: 1934408, NV: 3080156, NH: 1359711, NJ: 8882190, NM: 2096829, NY: 19453561, NC: 10488084, ND: 762062, OH: 11689100, OK: 3956971, OR: 4217737, PA: 12801989, PR: 3195000, RI: 1059361, SC: 5148714, SD: 884659, TN: 6829174, TX: 28995881, US: 327200000, UT: 3205958, VI: 107268, VT: 623989, VA: 8535519, WA: 7614893, WV: 1792147, WI: 5822434, WY: 578759};
 
-	 state_array['US'] = USA['US'];
-	 
-	 pos_plot_data[pos_plot_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+       state_alpha.forEach(function(st, i) {
+	 test_per_data[i].x = state_array[st].date;
 
-	 test_per_data[test_per_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+	 for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+	   test_per_data[i].y[day] = state_array[st].total_tests[day] / pop[st];
+	 }
+       });
 
-	 pos_abs_data[pos_abs_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+       //
+       // data for absolute number of positive test results plot
+       //
 
-	 test_abs_data[test_abs_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+       state_alpha.forEach(function(st, i) {
+	 pos_abs_data[i].x = state_array[st].date;
 
-	 pos_per_data[pos_per_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+	 for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+	   pos_abs_data[i].y[day] = state_array[st].pos_tests[day];
+	 }
+       });
 
-	 perc_change_data[perc_change_data.length] = {
-	     x: [],
-	     y: [],
-	     name: 'US',
-	     mode: 'lines+text',
-	     hoverinfo: 'name',
-	     text: 'US'
-	 };
+       //
+       // data for total number of test administered plot
+       //
 
-	 state_alpha.push('US');
-	 
-	 //
-	 // data for percent positive of all tests plot
-	 //
-	 
-	 state_alpha.forEach(function(st, i) {
-	     pos_plot_data[i].x = state_array[st].date;
+       state_alpha.forEach(function(st, i) {
+	 test_abs_data[i].x = state_array[st].date;
 
-	     for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+	 for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+	   test_abs_data[i].y[day] = state_array[st].total_tests[day];
+	 }
+       });
 
-		 var temp = state_array[st].pos_tests[day] / state_array[st].total_tests[day];
-		 if(temp < 1) {
-		     pos_plot_data[i].y[day] = temp;
-		 }
-	     }
-	 });
+       //
+       // data for positive tests per capita
+       //
 
-	 //
-	 // data for percent tested per capita plot
-	 //
-	 // population data
-	 var pop = {AL: 4903185, AK: 731545, AZ: 7278717, AR: 3017804, AS: 55641, CA: 39512223, CO: 5758736, CT: 3565287, DE: 973764, DC: 705749, FL: 21477737, GA: 10617423, GU: 164229, HI: 1415872, ID: 1787065, IL: 12671821, IN: 6732219, IA: 3155070, KS: 2913314, KY: 4467673, LA: 4648794, ME: 1344212, MD: 6045680, MA: 6892503, MI: 9986857, MN: 5639632, MP: 55144,  MS: 2976149, MO: 6137428, MT: 1068778, NE: 1934408, NV: 3080156, NH: 1359711, NJ: 8882190, NM: 2096829, NY: 19453561, NC: 10488084, ND: 762062, OH: 11689100, OK: 3956971, OR: 4217737, PA: 12801989, PR: 3195000, RI: 1059361, SC: 5148714, SD: 884659, TN: 6829174, TX: 28995881, US: 327200000, UT: 3205958, VI: 107268, VT: 623989, VA: 8535519, WA: 7614893, WV: 1792147, WI: 5822434, WY: 578759};
+       state_alpha.forEach(function(st, i) {
+	 pos_per_data[i].x = state_array[st].date;
 
-	 state_alpha.forEach(function(st, i) {
-	     test_per_data[i].x = state_array[st].date;
+	 for (var day = 0; day < state_array[st].pos_tests.length; day++) {
+	   pos_per_data[i].y[day] = state_array[st].pos_tests[day] / pop[st];
+	 }
+       });
 
-	     for (var day = 0; day < state_array[st].pos_tests.length; day++) {
-		 test_per_data[i].y[day] = state_array[st].total_tests[day] / pop[st];
-	     }
-	 });
+       //
+       // data for percent change by day
+       //
 
-	 //
-	 // data for absolute number of positive test results plot
-	 //
+       state_alpha.forEach(function(st, i) {
+	 perc_change_data[i].x = state_array[st].date;
 
-	 state_alpha.forEach(function(st, i) {
-	     pos_abs_data[i].x = state_array[st].date;
+	 for (var day = 0; day < state_array[st].pos_tests.length - 1; day++) {
+	   if(state_array[st].pos_tests[day+1] > 0){
+	     perc_change_data[i].y[day] = (state_array[st].pos_tests[day]- state_array[st].pos_tests[day+1]) /  (state_array[st].pos_tests[day+1]- state_array[st].pos_tests[day+2]) - 1; 
+	   }
+	 }
+       });
 
-	     for (var day = 0; day < state_array[st].pos_tests.length; day++) {
-		 pos_abs_data[i].y[day] = state_array[st].pos_tests[day];
-	     }
-	 });
+       /*
+	*
+	*
+	* PLOTS!
+	*
+	*
+	*/
+       
+       //
+       // percent positive of all tests plot
+       //
+       per_pos = document.getElementById('percent_positive');
+       
+       var layout_per_pos = {
+	 title: '<b>Percentage of Tests Found Positive by State</b><br>Only computed for dates/states where negative tests were reported',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Percent of tests found positive',
+	     standoff: 20
+	   },
+	   tickformat: '%',
+	   range: [0, 1]
+	 },
+	 hovermode: 'closest',
+	 dragmode: 'pan'
+       };
 
-	 //
-	 // data for total number of test administered plot
-	 //
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(per_pos, pos_plot_data, layout_per_pos, config);
 
-	 state_alpha.forEach(function(st, i) {
-	     test_abs_data[i].x = state_array[st].date;
+       //
+       // percent tested per capita plot
+       //
+       
+       test_per_cap = document.getElementById('tests_per_capita');
 
-	     for (var day = 0; day < state_array[st].pos_tests.length; day++) {
-		 test_abs_data[i].y[day] = state_array[st].total_tests[day];
-	     }
-	 });
+       var layout_test_per_cap = {
+	 title: '<b>Number of Tests Carried Out Per Capita by State</b><br>Choose linear or log y-axis in dropdown menu on left<br>',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Tests per capita',
+	     standoff: 20
+	   },
+	   range: [0, 1],
+	   autorange: true
+	 },
+	 hovermode: 'closest',
+	 dragmode: false,
+	 updatemenus: [{
+	   x: 0.15,
+	   yanchor: 'bottom',
+	   buttons: [{
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'linear', title: {text: 'Tests per capita', standoff: 20}}],
+	     label: 'linear'
+	   }, {
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'log', title: {text: 'Tests per capita', standoff: 20}}],
+	     label: 'log'
+	   }]
+	 }]
+       };
 
-	 //
-	 // data for positive tests per capita
-	 //
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(test_per_cap, test_per_data, layout_test_per_cap, config);
+       
+       //
+       // total count of positive test results plot
+       //
+       
+       pos_abs = document.getElementById('pos_abs_div');
 
-	 state_alpha.forEach(function(st, i) {
-	     pos_per_data[i].x = state_array[st].date;
+       var layout_pos_abs = {
+	 title: '<b>Total Number of Positive Test Results by State</b><br>Choose linear or log y-axis in dropdown menu on left',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Number of positive test results',
+	     standoff: 20
+	   },
+	   range: [0, 100000],
+	   autorange: true
+	 },
+	 hovermode: 'closest',
+	 dragmode: false,
+	 updatemenus: [{
+	   x: 0.15,
+	   yanchor: 'bottom',
+	   buttons: [{
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'linear', title: {text: 'Number of positive test results', standoff: 20}}],
+	     label: 'linear'
+	   }, {
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'log', title: {text: 'Number of positive test results', standoff: 20}}],
+	     label: 'log'
+	   }]
+	 }]
+       };
 
-	     for (var day = 0; day < state_array[st].pos_tests.length; day++) {
-		 pos_per_data[i].y[day] = state_array[st].pos_tests[day] / pop[st];
-	     }
-	 });
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(pos_abs, pos_abs_data, layout_pos_abs, config);
 
-	 //
-	 // data for percent change by day
-	 //
+       //
+       // total count of test plot
+       //
+       
+       test_abs = document.getElementById('test_abs_div');
 
-	 state_alpha.forEach(function(st, i) {
-	     perc_change_data[i].x = state_array[st].date;
+       var layout_test_abs = {
+	 title: '<b>Total Number of Test Administered by State</b><br>Choose linear or log y-axis in dropdown menu on left',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Number of test administered',
+	     standoff: 20
+	   },
+	   range: [0, 100000],
+	   autorange: true
+	 },
+	 hovermode: 'closest',
+	 dragmode: false,
+	 updatemenus: [{
+	   x: 0.15,
+	   yanchor: 'bottom',
+	   buttons: [{
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'linear', title: {text: 'Number of test administered', standoff: 20}}],
+	     label: 'linear'
+	   }, {
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'log', title: {text: 'Number of positive test results', standoff: 20}}],
+	     label: 'log'
+	   }]
+	 }]
+       };
 
-	     for (var day = 0; day < state_array[st].pos_tests.length - 1; day++) {
-		 if(state_array[st].pos_tests[day+1] > 0){
-		     perc_change_data[i].y[day] = state_array[st].pos_tests[day] / state_array[st].pos_tests[day+1] - 1;
-		 }
-	     }
-	 });
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(test_abs, test_abs_data, layout_test_abs, config);
 
-	 /*
-	  *
-	  *
-	  * PLOTS!
-	  *
-	  *
-	  */
-	 
-	 //
-	 // percent positive of all tests plot
-	 //
-	 per_pos = document.getElementById('percent_positive');
-	 
-	 var layout_per_pos = {
-	     title: '<b>Percentage of Tests Found Positive by State</b><br>Only computed for dates/states where negative tests were reported',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Percent of tests found positive',
-		     standoff: 20
-		 },
-		 tickformat: '%',
-		 range: [0, 1]
-	     },
-	     hovermode: 'closest',
-	     dragmode: 'pan'
-	 };
+       //
+       // Positive test results per capita plot
+       //
+       
+       pos_per = document.getElementById('pos_per_div');
 
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(per_pos, pos_plot_data, layout_per_pos, config);
+       var layout_pos_per = {
+	 title: '<b>Positive Test Results Per Capita by State</b><br>Choose linear or log y-axis in dropdown menu on left',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Positive results per capita',
+	     standoff: 20
+	   },
+	   range: [0, 1],
+	   autorange: true
+	 },
+	 hovermode: 'closest',
+	 dragmode: false,
+	 updatemenus: [{
+	   x: 0.15,
+	   yanchor: 'bottom',
+	   buttons: [{
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'linear', title: {text: 'Positive results per capita', standoff: 20}}],
+	     label: 'linear'
+	   }, {
+	     method: 'relayout',
+	     args: ['yaxis', {type: 'log', title: {text: 'Positive results per capita', standoff: 20}}],
+	     label: 'log'
+	   }]
+	 }]
+       };
 
-	 //
-	 // percent tested per capita plot
-	 //
-	 
-	 test_per_cap = document.getElementById('tests_per_capita');
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(pos_per, pos_per_data, layout_pos_per, config);
+       
+       //
+       // Percent change from previous day in positive cases plot
+       //
+       
+       perc_change = document.getElementById('perc_change_div');
 
-	 var layout_test_per_cap = {
-	     title: '<b>Number of Tests Carried Out Per Capita by State</b><br>Choose linear or log y-axis in dropdown menu on left<br>',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Tests per capita',
-		     standoff: 20
-		 },
-		 range: [0, 1],
-		 autorange: true
-	     },
-	     hovermode: 'closest',
-	     dragmode: false,
-	     updatemenus: [{
-		 x: 0.15,
-		 yanchor: 'bottom',
-		 buttons: [{
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'linear', title: {text: 'Tests per capita', standoff: 20}}],
-		     label: 'linear'
-		 }, {
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'log', title: {text: 'Tests per capita', standoff: 20}}],
-		     label: 'log'
-		 }]
-	     }]
-	 };
+       var layout_perc_change = {
+	 title: '<b>Percent Change in Positive Test Results from Previous Day by State</b>',
+	 xaxis: {
+	   range: ['2020-03-04', new Date]
+	 },
+	 yaxis: {
+	   title: {
+	     text: 'Percent change from previous day',
+	     standoff: 20
+	   },
+	   tickformat: '%',
+	   range: [0, 1],
+	   autorange: true
+	 },
+	 hovermode: 'closest',
+	 dragmode: false,
+       };
 
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(test_per_cap, test_per_data, layout_test_per_cap, config);
-	 
-	 //
-	 // total count of positive test results plot
-	 //
-	 
-	 pos_abs = document.getElementById('pos_abs_div');
-
-	 var layout_pos_abs = {
-	     title: '<b>Total Number of Positive Test Results by State</b><br>Choose linear or log y-axis in dropdown menu on left',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Number of positive test results',
-		     standoff: 20
-		 },
-		 range: [0, 100000],
-		 autorange: true
-	     },
-	     hovermode: 'closest',
-	     dragmode: false,
-	     updatemenus: [{
-		 x: 0.15,
-		 yanchor: 'bottom',
-		 buttons: [{
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'linear', title: {text: 'Number of positive test results', standoff: 20}}],
-		     label: 'linear'
-		 }, {
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'log', title: {text: 'Number of positive test results', standoff: 20}}],
-		     label: 'log'
-		 }]
-	     }]
-	 };
-
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(pos_abs, pos_abs_data, layout_pos_abs, config);
-
-	 //
-	 // total count of test plot
-	 //
-	 
-	 test_abs = document.getElementById('test_abs_div');
-
-	 var layout_test_abs = {
-	     title: '<b>Total Number of Test Administered by State</b><br>Choose linear or log y-axis in dropdown menu on left',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Number of test administered',
-		     standoff: 20
-		 },
-		 range: [0, 100000],
-		 autorange: true
-	     },
-	     hovermode: 'closest',
-	     dragmode: false,
-	     updatemenus: [{
-		 x: 0.15,
-		 yanchor: 'bottom',
-		 buttons: [{
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'linear', title: {text: 'Number of test administered', standoff: 20}}],
-		     label: 'linear'
-		 }, {
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'log', title: {text: 'Number of positive test results', standoff: 20}}],
-		     label: 'log'
-		 }]
-	     }]
-	 };
-
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(test_abs, test_abs_data, layout_test_abs, config);
-
-	 //
-	 // Positive test results per capita plot
-	 //
-	 
-	 pos_per = document.getElementById('pos_per_div');
-
-	 var layout_pos_per = {
-	     title: '<b>Positive Test Results Per Capita by State</b><br>Choose linear or log y-axis in dropdown menu on left',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Positive results per capita',
-		     standoff: 20
-		 },
-		 range: [0, 1],
-		 autorange: true
-	     },
-	     hovermode: 'closest',
-	     dragmode: false,
-	     updatemenus: [{
-		 x: 0.15,
-		 yanchor: 'bottom',
-		 buttons: [{
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'linear', title: {text: 'Positive results per capita', standoff: 20}}],
-		     label: 'linear'
-		 }, {
-		     method: 'relayout',
-		     args: ['yaxis', {type: 'log', title: {text: 'Positive results per capita', standoff: 20}}],
-		     label: 'log'
-		 }]
-	     }]
-	 };
-
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(pos_per, pos_per_data, layout_pos_per, config);
-	 
-	 //
-	 // Percent change from previous day in positive cases plot
-	 //
-	 
-	 perc_change = document.getElementById('perc_change_div');
-
-	 var layout_perc_change = {
-	     title: '<b>Percent Change in Positive Test Results from Previous Day by State</b>',
-	     xaxis: {
-		 range: ['2020-03-04', new Date]
-	     },
-	     yaxis: {
-		 title: {
-		     text: 'Percent change from previous day',
-		     standoff: 20
-		 },
-		 tickformat: '%',
-		 range: [0, 1],
-		 autorange: true
-	     },
-	     hovermode: 'closest',
-	     dragmode: false,
-	 };
-
-	 var config = {
-	     displaylogo: false
-	 };
-	 
-	 Plotly.newPlot(perc_change, perc_change_data, layout_perc_change, config);
-	 
+       var config = {
+	 displaylogo: false
+       };
+       
+       Plotly.newPlot(perc_change, perc_change_data, layout_perc_change, config);
+       
      });
 
      
     </script>
     <body>
-	
+      
       Data from <a href="https://covidtracking.com/">here</a><br>
       Single click in the legends on the right to add states. Double click in legends to see all states. Double click again to see just one. <br>
       Not designed to be mobile friendly. <br>
